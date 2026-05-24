@@ -652,7 +652,7 @@ def speak(text, status_kw=None, slow=None, min_play_sec=0.0):
             # Wait for playback: use Pi callback if available, else timer
             playback_done.clear()
             waited = 0.0
-            deadline = duration + 2.0  # safety margin
+            deadline = duration + 5.0  # safety margin
             while waited < deadline:
                 if interrupt_flag.is_set() and waited >= min_play_sec:
                     log("Interrupted by new input", "WARN")
