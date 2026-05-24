@@ -122,12 +122,16 @@ def _kill():
     audio_proc = None
 
 def stop_audio():
+    global audio_count
     with audio_lock:
+        audio_count += 1
         _kill()
 
 def play_audio(filepath):
     global audio_proc, audio_count, last_audio_ts
     with audio_lock:
+        audio_count += 1
+        my_id = audio_count
         _kill()
         if not os.path.exists(filepath) or os.path.getsize(filepath) < 100:
             pi_log(f"play_audio: file {filepath} does not exist or too small")
@@ -148,19 +152,23 @@ def play_audio(filepath):
                     audio_proc = subprocess.Popen(
                         cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                     )
-                    audio_count += 1
                     last_audio_ts = time.time()
                     # Notify Mac when playback finishes
                     _proc_ref = audio_proc
-                    def _done_monitor(proc=_proc_ref):
+                    def _done_monitor(proc=_proc_ref, playback_id=my_id):
                         pi_log(f"play_audio: monitor thread started for PID {proc.pid}")
                         try:
                             code = proc.wait(timeout=120)
                             pi_log(f"play_audio: player finished with exit code {code}")
                         except Exception as me:
                             pi_log(f"play_audio: monitor wait error: {me}")
-                        pi_log("play_audio: sending PLAYBACK_DONE callback to Mac")
-                        _send_callback(CB_PLAYBACK_DONE)
+                        with audio_lock:
+                            is_active = (playback_id == audio_count)
+                        if is_active:
+                            pi_log("play_audio: sending PLAYBACK_DONE callback to Mac")
+                            _send_callback(CB_PLAYBACK_DONE)
+                        else:
+                            pi_log(f"play_audio: obsolete playback {playback_id} (current {audio_count}), skipping callback")
                     threading.Thread(target=_done_monitor, daemon=True).start()
                     return
                 except Exception as pe:
@@ -184,10 +192,9 @@ def play_audio(filepath):
                 audio_proc = subprocess.Popen(
                     ["aplay", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                 )
-                audio_count += 1
                 last_audio_ts = time.time()
                 # Clean up WAV after playback finishes + notify Mac
-                def _cleanup_wav(proc, path):
+                def _cleanup_wav(proc, path, playback_id=my_id):
                     pi_log(f"play_audio: wav monitor started for PID {proc.pid}")
                     try:
                         code = proc.wait(timeout=120)
@@ -199,8 +206,13 @@ def play_audio(filepath):
                         pi_log(f"play_audio: deleted temp wav {path}")
                     except Exception as re:
                         pi_log(f"play_audio: failed to delete wav: {re}")
-                    pi_log("play_audio: sending PLAYBACK_DONE callback to Mac")
-                    _send_callback(CB_PLAYBACK_DONE)
+                    with audio_lock:
+                        is_active = (playback_id == audio_count)
+                    if is_active:
+                        pi_log("play_audio: sending PLAYBACK_DONE callback to Mac")
+                        _send_callback(CB_PLAYBACK_DONE)
+                    else:
+                        pi_log(f"play_audio: obsolete WAV playback {playback_id} (current {audio_count}), skipping callback")
                 threading.Thread(target=_cleanup_wav, args=(audio_proc, wav), daemon=True).start()
                 return
             except Exception as ae:
