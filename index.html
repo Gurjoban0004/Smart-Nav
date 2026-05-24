@@ -450,6 +450,38 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(63, 94, 62, 0); }
         }
 
+        /* ─── LANGUAGE SELECTOR ─────────────────────────────────────────────────── */
+        .lang-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 20px;
+            width: fit-content;
+            margin: -5px auto 5px auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active {
+            background-color: var(--pastel-sage-light);
+            color: var(--pastel-sage-dark);
+        }
+
         /* Responsive styling for larger views */
         @media (min-width: 500px) {
             body {
@@ -467,6 +499,13 @@
             <h1>Smart Nav Guide</h1>
             <p>Chitkara University Mobile Companion</p>
         </header>
+
+        <!-- Language Selector -->
+        <div class="lang-selector">
+            <button class="lang-btn active" data-lang="en" onclick="updateLanguage('en')">EN</button>
+            <button class="lang-btn" data-lang="hi" onclick="updateLanguage('hi')">हिन्दी</button>
+            <button class="lang-btn" data-lang="pa" onclick="updateLanguage('pa')">ਪੰਜਾਬੀ</button>
+        </div>
 
         <!-- Connection Status -->
         <div class="status-bar" id="connection-status">
@@ -519,6 +558,206 @@
 
     <!-- Script: System Logic -->
     <script>
+        // ─── TRANSLATIONS ────────────────────────────────────────────────────────
+        const TRANSLATIONS = {
+            en: {
+                "Smart Nav Guide": "Smart Nav Guide",
+                "Chitkara University Mobile Companion": "Chitkara University Mobile Companion",
+                "Mode": "Mode",
+                "Directory": "Directory",
+                "Live Connected": "Live Connected",
+                "Offline Saved": "Offline Saved",
+                "Connecting...": "Connecting...",
+                "Directory Mode": "Directory Mode",
+                "No Route Loaded": "No Route Loaded",
+                "Speak to the campus kiosk to find a location, then scan the QR code or click Sync below to load your directions.": "Speak to the campus kiosk to find a location, then scan the QR code or click Sync below to load your directions.",
+                "Sync with Kiosk": "Sync with Kiosk",
+                "All Locations": "All Locations",
+                "Quick View": "Quick View",
+                "Clear & Show Directory": "Clear & Show Directory",
+                "Synced via secure Cloud broker": "Synced via secure Cloud broker",
+                "Directions for": "Directions for",
+                "meters": "meters",
+                "Start from Main Gate": "Start from Main Gate",
+                "Walk straight": "Walk straight",
+                "Destination reached": "Destination reached",
+                "Pass Turing Block": "Pass Turing Block",
+                "Pass Chancellor Office": "Pass Chancellor Office",
+                "Turn left": "Turn left",
+                "Continue": "Continue",
+                "Pass Exploratorium": "Pass Exploratorium",
+                "Turn right": "Turn right",
+                "Reach Gate Number 4": "Reach Gate Number 4",
+                "Pass Omega Ground": "Pass Omega Ground",
+                "Cross the gate": "Cross the gate",
+                "Turing Block": "Turing Block",
+                "DICE Lab": "DICE Lab",
+                "Square One": "Square One",
+                "Tesla Block": "Tesla Block",
+                "Rockefeller Block": "Rockefeller Block",
+                "Near": "Near",
+                "2 to 3 minutes": "2 to 3 minutes",
+                "4 to 5 minutes": "4 to 5 minutes",
+                "5 to 6 minutes": "5 to 6 minutes",
+                "7 to 8 minutes": "7 to 8 minutes",
+                "Chancellor Office": "Chancellor Office",
+                "Exploratorium": "Exploratorium",
+                "Omega Ground": "Omega Ground",
+                "Gate 4": "Gate 4",
+                "Main Gate": "Main Gate"
+            },
+            hi: {
+                "Smart Nav Guide": "स्मार्ट नव गाइड",
+                "Chitkara University Mobile Companion": "चितकारा यूनिवर्सिटी मोबाइल साथी",
+                "Mode": "मोड",
+                "Directory": "निर्देशिका",
+                "Live Connected": "लाइव कनेक्टेड",
+                "Offline Saved": "ऑफ़लाइन सेव्ड",
+                "Connecting...": "कनेक्ट हो रहा है...",
+                "Directory Mode": "निर्देशिका मोड",
+                "No Route Loaded": "कोई मार्ग लोड नहीं",
+                "Speak to the campus kiosk to find a location, then scan the QR code or click Sync below to load your directions.": "स्थान खोजने के लिए परिसर कियोस्क से बोलें, फिर दिशानिर्देश लोड करने के लिए क्यूआर कोड स्कैन करें या नीचे सिंक पर क्लिक करें।",
+                "Sync with Kiosk": "कियोस्क से सिंक करें",
+                "All Locations": "सभी स्थान",
+                "Quick View": "त्वरित दृश्य",
+                "Clear & Show Directory": "साफ़ करें और निर्देशिका दिखाएं",
+                "Synced via secure Cloud broker": "सुरक्षित क्लाउड ब्रोकर के माध्यम से सिंक किया गया",
+                "Directions for": "दिशानिर्देश के लिए",
+                "meters": "मीटर",
+                "Start from Main Gate": "मुख्य द्वार से शुरू करें",
+                "Walk straight": "सीधे चलें",
+                "Destination reached": "मंज़िल पर पहुँच गए",
+                "Pass Turing Block": "ट्यूरिंग ब्लॉक को पार करें",
+                "Pass Chancellor Office": "चांसलर ऑफिस को पार करें",
+                "Turn left": "बाएं मुड़ें",
+                "Continue": "जारी रखें",
+                "Pass Exploratorium": "एक्सप्लोरेटोरियम को पार करें",
+                "Turn right": "दाएं मुड़ें",
+                "Reach Gate Number 4": "गेट नंबर 4 पर पहुँचें",
+                "Pass Omega Ground": "ओमेगा ग्राउंड को पार करें",
+                "Cross the gate": "गेट को पार करें",
+                "Turing Block": "ट्यूरिंग ब्लॉक",
+                "DICE Lab": "डाइस लैब",
+                "Square One": "स्क्वायर वन",
+                "Tesla Block": "टेस्ला ब्लॉक",
+                "Rockefeller Block": "रॉकफेलर ब्लॉक",
+                "Near": "पास",
+                "2 to 3 minutes": "2 से 3 मिनट",
+                "4 to 5 minutes": "4 से 5 मिनट",
+                "5 to 6 minutes": "5 से 6 मिनट",
+                "7 to 8 minutes": "7 से 8 मिनट",
+                "Chancellor Office": "चांसलर ऑफिस",
+                "Exploratorium": "एक्सप्लोरेटोरियम",
+                "Omega Ground": "ओमेगा ग्राउंड",
+                "Gate 4": "गेट 4",
+                "Main Gate": "मुख्य द्वार"
+            },
+            pa: {
+                "Smart Nav Guide": "ਸਮਾਰਟ ਨੈਵ ਗਾਈਡ",
+                "Chitkara University Mobile Companion": "ਚਿਤਕਾਰਾ ਯੂਨੀਵਰਸਿਟੀ ਮੋਬਾਈਲ ਸਾਥੀ",
+                "Mode": "ਮੋਡ",
+                "Directory": "ਡਾਇਰੈਕਟਰੀ",
+                "Live Connected": "ਲਾਈਵ ਕਨੈਕਟਡ",
+                "Offline Saved": "ਆਫਲਾਈਨ ਸੇਵਡ",
+                "Connecting...": "ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ...",
+                "Directory Mode": "ਡਾਇਰੈਕਟਰੀ ਮੋਡ",
+                "No Route Loaded": "ਕੋਈ ਰੂਟ ਲੋਡ ਨਹੀਂ",
+                "Speak to the campus kiosk to find a location, then scan the QR code or click Sync below to load your directions.": "ਸਥਾਨ ਲੱਭਣ ਲਈ ਕੈਂਪਸ ਕਿਓਸਕ ਨਾਲ ਗੱਲ ਕਰੋ, ਫਿਰ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਲੋਡ ਕਰਨ ਲਈ QR ਕੋਡ ਸਕੈਨ ਕਰੋ ਜਾਂ ਹੇਠਾਂ ਦਿੱਤੇ ਸਿੰਕ 'ਤੇ ਕਲਿੱਕ ਕਰੋ।",
+                "Sync with Kiosk": "ਕਿਓਸਕ ਨਾਲ ਸਿੰਕ ਕਰੋ",
+                "All Locations": "ਸਾਰੇ ਸਥਾਨ",
+                "Quick View": "ਤੁਰੰਤ ਦੇਖੋ",
+                "Clear & Show Directory": "ਸਾਫ਼ ਕਰੋ ਅਤੇ ਡਾਇਰੈਕਟਰੀ ਦਿਖਾਓ",
+                "Synced via secure Cloud broker": "ਸੁਰੱਖਿਅਤ ਕਲਾਉਡ ਬ੍ਰੋਕਰ ਰਾਹੀਂ ਸਿੰਕ ਕੀਤਾ ਗਿਆ",
+                "Directions for": "ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਲਈ",
+                "meters": "ਮੀਟਰ",
+                "Start from Main Gate": "ਮੁੱਢਲੇ ਗੇਟ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ",
+                "Walk straight": "ਸਿੱਧੇ ਚੱਲੋ",
+                "Destination reached": "ਮੰਜ਼ਿਲ 'ਤੇ ਪਹੁੰਚ ਗਏ",
+                "Pass Turing Block": "ਟਿਊਰਿੰਗ ਬਲਾਕ ਦੇ ਕੋਲੋਂ ਲੰਘੋ",
+                "Pass Chancellor Office": "ਚਾਂਸਲਰ ਆਫਿਸ ਦੇ ਕੋਲੋਂ ਲੰਘੋ",
+                "Turn left": "ਖੱਬੇ ਮੁੜੋ",
+                "Continue": "ਜਾਰੀ ਰੱਖੋ",
+                "Pass Exploratorium": "ਐਕਸਪਲੋਰੇਟੋਰੀਅਮ ਦੇ ਕੋਲੋਂ ਲੰਘੋ",
+                "Turn right": "ਸੱਜੇ ਮੁੜੋ",
+                "Reach Gate Number 4": "ਗੇਟ ਨੰਬਰ 4 'ਤੇ ਪਹੁੰਚੋ",
+                "Pass Omega Ground": "ਓਮੇਗਾ ਗਰਾਊਂਡ ਦੇ ਕੋਲੋਂ ਲੰਘੋ",
+                "Cross the gate": "ਗੇਟ ਪਾਰ ਕਰੋ",
+                "Turing Block": "ਟਿਊਰਿੰਗ ਬਲਾਕ",
+                "DICE Lab": "ਡਾਈਸ ਲੈਬ",
+                "Square One": "ਸਕੁਏਅਰ ਵਨ",
+                "Tesla Block": "ਟੈਸਲਾ ਬਲਾਕ",
+                "Rockefeller Block": "ਰਾਕਫੈਲਰ ਬਲਾਕ",
+                "Near": "ਨੇੜੇ",
+                "2 to 3 minutes": "2 ਤੋਂ 3 ਮਿੰਟ",
+                "4 to 5 minutes": "4 ਤੋਂ 5 ਮਿੰਟ",
+                "5 to 6 minutes": "5 ਤੋਂ 6 ਮਿੰਟ",
+                "7 to 8 minutes": "7 ਤੋਂ 8 ਮਿੰਟ",
+                "Chancellor Office": "ਚਾਂਸਲਰ ਆਫਿਸ",
+                "Exploratorium": "ਐਕਸਪਲੋਰੇਟੋਰੀਅਮ",
+                "Omega Ground": "ਓਮੇਗਾ ਗਰਾਊਂਡ",
+                "Gate 4": "ਗੇਟ 4",
+                "Main Gate": "ਮੁੱਢਲਾ ਗੇਟ"
+            }
+        };
+
+        let currentLang = "en";
+
+        function t(key) {
+            if (!key) return "";
+            const cleanKey = key.trim();
+            if (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][cleanKey]) {
+                return TRANSLATIONS[currentLang][cleanKey];
+            }
+            return cleanKey;
+        }
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            
+            document.querySelectorAll(".lang-btn").forEach(btn => {
+                if (btn.getAttribute("data-lang") === lang) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+
+            localStorage.setItem("app_lang", lang);
+
+            // Translate static DOM elements
+            document.querySelector("header h1").innerText = t("Smart Nav Guide");
+            document.querySelector("header p").innerText = t("Chitkara University Mobile Companion");
+            document.querySelector(".status-title").innerText = t("Mode");
+            
+            document.querySelector("#empty-display h3").innerText = t("No Route Loaded");
+            document.querySelector("#empty-display p").innerText = t("Speak to the campus kiosk to find a location, then scan the QR code or click Sync below to load your directions.");
+            document.querySelector("#btn-initial-sync").innerText = t("Sync with Kiosk");
+            
+            const dirTitle = document.querySelector(".dir-title");
+            if (dirTitle) {
+                dirTitle.innerHTML = `
+                    <span>${t("All Locations")}</span>
+                    <span style="font-size: 12px; font-weight: 400; color: var(--text-muted);">${t("Quick View")}</span>
+                `;
+            }
+            
+            elBtnClear.innerText = t("Clear & Show Directory");
+            elIpFooter.innerText = t("Synced via secure Cloud broker");
+
+            if (currentRoute) {
+                const savedRouteJson = localStorage.getItem("saved_route");
+                if (savedRouteJson) {
+                    setSyncModeUI("saved");
+                } else {
+                    setSyncModeUI("live");
+                }
+                renderRoute(currentRoute);
+            } else {
+                showDirectoryUI();
+                renderDirectory();
+            }
+        }
+
         // ─── STATIC ROUTES DATABASE ──────────────────────────────────────────────
         const ROUTES_DATABASE = {
             "Turing Block": {
@@ -609,13 +848,6 @@
 
         // ─── INITIALIZATION ──────────────────────────────────────────────────────
         function init() {
-            // Setup local IP display
-            elIpFooter.innerText = "Synced via secure Cloud broker";
-            
-            // Build directory UI
-            renderDirectory();
-
-            // Load saved route from localStorage if present
             const savedRouteJson = localStorage.getItem("saved_route");
             const savedCheckedSteps = localStorage.getItem("checked_steps");
             
@@ -626,14 +858,14 @@
             if (savedRouteJson) {
                 try {
                     currentRoute = JSON.parse(savedRouteJson);
-                    setSyncModeUI("saved");
-                    renderRoute(currentRoute);
                 } catch (e) {
                     clearLocalRoute();
                 }
-            } else {
-                showDirectoryUI();
             }
+
+            // Load saved language or default to en
+            const savedLang = localStorage.getItem("app_lang") || "en";
+            updateLanguage(savedLang);
 
             // Sync Button Listeners
             elBtnInitialSync.addEventListener("click", syncWithKiosk);
@@ -716,7 +948,7 @@
                 if (step.distance) subtext += `${step.distance}m`;
                 if (step.landmark) {
                     if (subtext) subtext += " • ";
-                    subtext += `Near ${step.landmark}`;
+                    subtext += `${t("Near")} ${t(step.landmark)}`;
                 }
 
                 stepsHtml += `
@@ -727,7 +959,7 @@
                             </svg>
                         </div>
                         <div class="step-text">
-                            <span class="step-desc">${step.instruction}</span>
+                            <span class="step-desc">${t(step.instruction)}</span>
                             ${subtext ? `<span class="step-subtext">${subtext}</span>` : ""}
                         </div>
                     </div>
@@ -736,11 +968,11 @@
 
             elRouteDisplay.innerHTML = `
                 <div class="route-summary">
-                    <span class="dest-label">Directions for</span>
-                    <span class="dest-name">${destName}</span>
+                    <span class="dest-label">${t("Directions for")}</span>
+                    <span class="dest-name">${t(destName)}</span>
                     <div class="route-metrics">
-                        <span class="metric-pill metric-distance">📏 ${dist} meters</span>
-                        <span class="metric-pill metric-eta">⏱️ ${eta}</span>
+                        <span class="metric-pill metric-distance">📏 ${dist} ${t("meters")}</span>
+                        <span class="metric-pill metric-eta">⏱️ ${t(eta)}</span>
                     </div>
                 </div>
                 
@@ -757,8 +989,8 @@
                 listHtml += `
                     <div class="dir-item" onclick="loadStaticRoute('${key}')">
                         <div class="dir-info">
-                            <span class="dir-name">${r.destination}</span>
-                            <span class="dir-meta">📏 ${r.distance_meters}m  •  ⏱️ ${r.estimated_walking_time}</span>
+                            <span class="dir-name">${t(r.destination)}</span>
+                            <span class="dir-meta">📏 ${r.distance_meters}m  •  ⏱️ ${t(r.estimated_walking_time)}</span>
                         </div>
                         <div class="dir-arrow">➔</div>
                     </div>
@@ -820,16 +1052,16 @@
         function setSyncModeUI(mode) {
             if (mode === "live") {
                 elSyncModeBadge.className = "badge badge-live";
-                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-sage-dark);"></span><span>Live Connected</span>`;
+                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-sage-dark);"></span><span>${t("Live Connected")}</span>`;
             } else if (mode === "saved") {
                 elSyncModeBadge.className = "badge badge-live";
-                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-sage-dark);"></span><span>Offline Saved</span>`;
+                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-sage-dark);"></span><span>${t("Offline Saved")}</span>`;
             } else if (mode === "loading") {
                 elSyncModeBadge.className = "badge badge-offline";
-                elSyncModeBadge.innerHTML = `<span>Connecting...</span>`;
+                elSyncModeBadge.innerHTML = `<span>${t("Connecting...")}</span>`;
             } else {
                 elSyncModeBadge.className = "badge badge-offline";
-                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-lavender-dark);"></span><span>Directory Mode</span>`;
+                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-lavender-dark);"></span><span>${t("Directory Mode")}</span>`;
             }
         }
 
