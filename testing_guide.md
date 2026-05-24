@@ -129,11 +129,11 @@ Voice commands are parsed **before** destination matching, ensuring they do not 
 
 ### Launching the Webpage
 1. Ensure the Mac server is running.
-2. Open your mobile phone's browser (or Mac browser) and navigate to:
-   `http://<mac-ip>:8000`
-   *(For example: http://192.168.245.178:8000)*
+2. Open your mobile phone's browser and navigate to either:
+   * Your Vercel deployment URL (e.g., `https://smart-nav.vercel.app`)
+   * Or locally served from the Mac at: `http://<mac-ip>:8000`
 
-### Test Scenario 1: Offline Directory Mode (Vercel Mode)
+### Test Scenario 1: Offline Directory Mode
 1. With the webpage open, do not tap "Sync".
 2. Scroll down to the **All Locations** directory list.
 3. Tap on **"Tesla Block"** or **"DICE Lab"**.
@@ -142,10 +142,9 @@ Voice commands are parsed **before** destination matching, ensuring they do not 
 6. Refresh the page and confirm that the route and checkmarks **persist** (loaded from `localStorage`).
 7. Tap **"Clear & Show Directory"** to return to the directory list.
 
-### Test Scenario 2: Live Kiosk Sync Mode (Kiosk Mode)
+### Test Scenario 2: Live Kiosk Cloud Sync Mode
 1. Speak a destination to the kiosk (e.g., *"Square One"*).
-2. The kiosk will process and announce the route.
-3. On the phone webpage, tap **"Sync with Kiosk"** (or click the green sync button at the top).
-4. Verify that the webpage connects to the kiosk server, loads the **"Square One"** route, and displays its steps.
-5. Tap steps to check them off.
-6. Tapping *"Clear & Show Directory"* will reset the screen without affecting the kiosk itself.
+2. The kiosk will process and announce the route. The Mac server will automatically upload this route to the secure cloud broker at `jsonblob.com`.
+3. On the phone webpage (hosted on Vercel or locally), tap **"Sync with Kiosk"** (or click the green sync button at the top).
+4. Verify that the webpage connects to the cloud broker, loads the **"Square One"** route, and displays its steps.
+5. Tap steps to check them off. Tapping *"Clear & Show Directory"* will reset the screen.
