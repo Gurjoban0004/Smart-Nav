@@ -595,7 +595,7 @@
         let checkedSteps = {}; // key: destination_stepIndex, value: boolean
         
         // Public Cloud broker URL (prevents HTTPS mixed content blocks on Vercel)
-        const API_URL = "https://api.codetabs.com/v1/proxy/?quest=https://jsonblob.com/api/jsonBlob/019e5a61-300f-76df-88d2-658f90a89439";
+        const RAW_API_URL = "https://jsonblob.com/api/jsonBlob/019e5a61-300f-76df-88d2-658f90a89439";
 
         // Elements
         const elSyncModeBadge = document.getElementById("sync-mode-badge");
@@ -641,20 +641,40 @@
         }
 
         // ─── NETWORK SYNC ────────────────────────────────────────────────────────
+        async function fetchWithFallback(url) {
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`,
+                `https://corsproxy.io/?url=${encodeURIComponent(url)}`
+            ];
+
+            let lastError = null;
+            for (const proxyUrl of proxies) {
+                try {
+                    console.log("Attempting sync via proxy:", proxyUrl);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout per proxy
+                    
+                    const response = await fetch(proxyUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}`);
+                    }
+                    
+                    const rawData = await response.json();
+                    if (rawData) return rawData;
+                } catch (err) {
+                    console.warn(`Proxy ${proxyUrl} failed:`, err);
+                    lastError = err;
+                }
+            }
+            throw lastError || new Error("All proxies failed");
+        }
+
         async function syncWithKiosk() {
             setSyncModeUI("loading");
             try {
-                // Fetch with a 4-second timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 4000);
-                
-                const response = await fetch(API_URL, { 
-                    signal: controller.signal,
-                    headers: { 'Accept': 'application/json' }
-                });
-                clearTimeout(timeoutId);
-                
-                const data = await response.json();
+                const data = await fetchWithFallback(RAW_API_URL);
                 
                 if (data && data.route) {
                     currentRoute = data.route;
