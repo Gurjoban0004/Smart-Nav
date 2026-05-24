@@ -42,6 +42,7 @@ state = {
     "last_heard":  "—",
     "speaking":    "NO",
     "step_index":  "-1",
+    "playback_id": "-1",
 }
 
 route_steps   = []
@@ -131,7 +132,9 @@ def play_audio(filepath):
     global audio_proc, audio_count, last_audio_ts
     with audio_lock:
         audio_count += 1
-        my_id = audio_count
+        my_local_id = audio_count
+        with state_lock:
+            my_mac_id = state.get("playback_id", "-1")
         _kill()
         if not os.path.exists(filepath) or os.path.getsize(filepath) < 100:
             pi_log(f"play_audio: file {filepath} does not exist or too small")
@@ -155,7 +158,7 @@ def play_audio(filepath):
                     last_audio_ts = time.time()
                     # Notify Mac when playback finishes
                     _proc_ref = audio_proc
-                    def _done_monitor(proc=_proc_ref, playback_id=my_id):
+                    def _done_monitor(proc=_proc_ref, local_id=my_local_id, mac_id=my_mac_id):
                         pi_log(f"play_audio: monitor thread started for PID {proc.pid}")
                         try:
                             code = proc.wait(timeout=120)
@@ -163,12 +166,14 @@ def play_audio(filepath):
                         except Exception as me:
                             pi_log(f"play_audio: monitor wait error: {me}")
                         with audio_lock:
-                            is_active = (playback_id == audio_count)
-                        if is_active:
-                            pi_log("play_audio: sending PLAYBACK_DONE callback to Mac")
-                            _send_callback(CB_PLAYBACK_DONE)
+                            is_active_local = (local_id == audio_count)
+                        with state_lock:
+                            is_active_mac = (mac_id == state.get("playback_id", "-1"))
+                        if is_active_local and is_active_mac:
+                            pi_log(f"play_audio: sending PLAYBACK_DONE callback for ID {mac_id} to Mac")
+                            _send_callback(f"{CB_PLAYBACK_DONE}:{mac_id}")
                         else:
-                            pi_log(f"play_audio: obsolete playback {playback_id} (current {audio_count}), skipping callback")
+                            pi_log(f"play_audio: obsolete playback local:{local_id}/{audio_count} mac:{mac_id}/{state.get('playback_id')}, skipping callback")
                     threading.Thread(target=_done_monitor, daemon=True).start()
                     return
                 except Exception as pe:
@@ -194,7 +199,7 @@ def play_audio(filepath):
                 )
                 last_audio_ts = time.time()
                 # Clean up WAV after playback finishes + notify Mac
-                def _cleanup_wav(proc, path, playback_id=my_id):
+                def _cleanup_wav(proc, path, local_id=my_local_id, mac_id=my_mac_id):
                     pi_log(f"play_audio: wav monitor started for PID {proc.pid}")
                     try:
                         code = proc.wait(timeout=120)
@@ -207,12 +212,14 @@ def play_audio(filepath):
                     except Exception as re:
                         pi_log(f"play_audio: failed to delete wav: {re}")
                     with audio_lock:
-                        is_active = (playback_id == audio_count)
-                    if is_active:
-                        pi_log("play_audio: sending PLAYBACK_DONE callback to Mac")
-                        _send_callback(CB_PLAYBACK_DONE)
+                        is_active_local = (local_id == audio_count)
+                    with state_lock:
+                        is_active_mac = (mac_id == state.get("playback_id", "-1"))
+                    if is_active_local and is_active_mac:
+                        pi_log(f"play_audio: sending PLAYBACK_DONE callback for WAV ID {mac_id} to Mac")
+                        _send_callback(f"{CB_PLAYBACK_DONE}:{mac_id}")
                     else:
-                        pi_log(f"play_audio: obsolete WAV playback {playback_id} (current {audio_count}), skipping callback")
+                        pi_log(f"play_audio: obsolete WAV playback local:{local_id}/{audio_count} mac:{mac_id}/{state.get('playback_id')}, skipping callback")
                 threading.Thread(target=_cleanup_wav, args=(audio_proc, wav), daemon=True).start()
                 return
             except Exception as ae:

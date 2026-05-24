@@ -117,6 +117,8 @@ last_pi_heartbeat = time.time()
 _pi_heartbeat_lock = threading.Lock()
 _welcome_spoken = False
 _welcome_lock = threading.Lock()
+mac_playback_id = 0
+active_playback_id = "0"
 
 # ─── PERSISTENT EVENT LOOP FOR TTS ───────────────────────────────────────────
 
@@ -590,7 +592,11 @@ def speak(text, status_kw=None, slow=None, min_play_sec=0.0):
             use_slow = app["slow_mode"] if slow is None else slow
             app["speaking"] = True
 
-        pi_kw = {"speaking": "YES"}
+        global mac_playback_id, active_playback_id
+        mac_playback_id += 1
+        active_playback_id = str(mac_playback_id)
+
+        pi_kw = {"speaking": "YES", "playback_id": active_playback_id}
         if status_kw:
             with app_lock:
                 for k, v in status_kw.items():
@@ -603,7 +609,7 @@ def speak(text, status_kw=None, slow=None, min_play_sec=0.0):
             push_status(**pi_kw)
             render_panel()
         else:
-            push_status(speaking="YES")
+            push_status(speaking="YES", playback_id=active_playback_id)
 
         stop_pi_audio()
         time.sleep(0.1)
@@ -1095,7 +1101,16 @@ def pi_callback_listener():
 
             msg = data.decode(errors="ignore").strip()
             if CB_PLAYBACK_DONE in msg:
-                playback_done.set()
+                parts = msg.split(":")
+                p_id = parts[1] if len(parts) > 1 else None
+                if p_id:
+                    if p_id == active_playback_id:
+                        log(f"Callback matches active playback ID {p_id}", "OK")
+                        playback_done.set()
+                    else:
+                        log(f"Callback ignored: obsolete playback ID {p_id} (active {active_playback_id})", "WARN")
+                else:
+                    playback_done.set()
             if CB_HEARTBEAT in msg:
                 global last_pi_heartbeat
                 with _pi_heartbeat_lock:
