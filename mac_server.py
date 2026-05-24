@@ -281,6 +281,38 @@ render_panel()
 
 # ─── ROUTE HELPERS ────────────────────────────────────────────────────────────
 
+PHONETIC_CORRECTIONS = {
+    "touring": "turing",
+    "during": "turing",
+    "turin": "turing",
+    "tearing": "turing",
+    "cheering": "turing",
+    "chew ring": "turing",
+    "uring": "turing",
+    "churing": "turing",
+    
+    "days": "dice",
+    "dies": "dice",
+    "dye": "dice",
+    "dyes": "dice",
+    "dais": "dice",
+    "dyce": "dice",
+    "diess": "dice",
+    
+    "tasla": "tesla",
+    "tessla": "tesla",
+    
+    "rock feller": "rockefeller",
+    "rocky feller": "rockefeller",
+    "rocker feller": "rockefeller",
+    "rockefellar": "rockefeller",
+    
+    "square 1": "square one",
+    "squareone": "square one",
+    "sq 1": "square one",
+    "squire": "square"
+}
+
 def clean_text(t):
     return re.sub(r"[.,?!'\"\-]+", "", t.lower()).strip()
 
@@ -295,15 +327,56 @@ def normalize_query(text):
         t = t.replace(p, "")
     return t.strip()
 
+def calculate_match_score(query, target):
+    if query == target:
+        return 1.0
+        
+    if len(query) >= 3:
+        if query in target or target in query:
+            sub_ratio = min(len(query), len(target)) / max(len(query), len(target))
+            return 0.8 + 0.15 * sub_ratio
+            
+    q_words = set(query.split())
+    t_words = set(target.split())
+    if not q_words or not t_words:
+        return 0.0
+        
+    intersection = q_words & t_words
+    union = q_words | t_words
+    jaccard = len(intersection) / len(union)
+    
+    containment = len(intersection) / len(t_words)
+    
+    keywords = {"turing", "dice", "tesla", "rockefeller", "square"}
+    has_keyword_match = any(w in keywords for w in intersection)
+    
+    if containment == 1.0 and has_keyword_match:
+        return 0.95
+        
+    word_score = jaccard
+    if has_keyword_match:
+        word_score = max(word_score, 0.75)
+        
+    seq_score = difflib.SequenceMatcher(None, query, target).ratio()
+    return max(word_score, seq_score, containment * 0.8)
+
 def find_route(speech):
     query = normalize_query(speech)
-    best, score = None, 0.0
+    for typo, correction in PHONETIC_CORRECTIONS.items():
+        query = re.sub(r'\b' + re.escape(typo) + r'\b', correction, query)
+        
+    best, best_score = None, 0.0
     for r in ROUTES_DATA["routes"]:
-        for name in [r["destination"]] + r.get("aliases", []):
-            s = difflib.SequenceMatcher(None, query, clean_text(name)).ratio()
-            if s > score:
-                score, best = s, r
-    return best if score >= 0.55 else None
+        dest_name = clean_text(r["destination"])
+        aliases = [clean_text(a) for a in r.get("aliases", [])]
+        for name in [dest_name] + aliases:
+            score = calculate_match_score(query, name)
+            if score > best_score:
+                best_score = score
+                best = r
+                
+    log(f"Speech match for '{speech}' -> normalized '{query}' matched '{best['destination'] if best else None}' with score {best_score:.2f}", "GREY")
+    return best if best_score >= 0.55 else None
 
 def route_step_list(route):
     out = []
@@ -1030,7 +1103,13 @@ def transcribe(raw_audio):
     render_panel()
     log("Transcribing…", "GREY")
 
-    result = model.transcribe(wav_path, language="en")
+    initial_prompt = (
+        "Chitkara University navigation commands and destinations: "
+        "Turing Block, DICE Lab, Square One, Tesla Block, Rockefeller Block, "
+        "Chancellor Office, Exploratorium, Gate 4, Main Gate, "
+        "cancel, repeat, short, fast, full, slow, normal, volume up, volume down, help"
+    )
+    result = model.transcribe(wav_path, language="en", initial_prompt=initial_prompt)
     speech = result["text"].strip()
     cmd    = clean_text(speech)
 
