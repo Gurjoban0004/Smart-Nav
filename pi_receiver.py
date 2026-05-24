@@ -141,6 +141,46 @@ def play_audio(filepath, playback_id):
             pi_log(f"play_audio: file {filepath} does not exist or too small")
             return
         pi_log(f"play_audio: starting playback of {filepath} ({os.path.getsize(filepath)} bytes)")
+        
+        # Check if the file is natively a WAV file
+        is_wav = False
+        try:
+            with open(filepath, "rb") as f:
+                header = f.read(12)
+                if header.startswith(b"RIFF") and b"WAVE" in header:
+                    is_wav = True
+        except:
+            pass
+
+        if is_wav:
+            pi_log("play_audio: file is WAV, playing directly via aplay")
+            try:
+                audio_proc = subprocess.Popen(
+                    ["aplay", filepath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                )
+                last_audio_ts = time.time()
+                # Notify Mac when playback finishes
+                _proc_ref = audio_proc
+                def _done_monitor_wav(proc=_proc_ref, local_id=my_local_id, mac_id=my_mac_id):
+                    pi_log(f"play_audio: wav monitor thread started for PID {proc.pid}")
+                    try:
+                        code = proc.wait(timeout=120)
+                        pi_log(f"play_audio: aplay finished with exit code {code}")
+                    except Exception as me:
+                        pi_log(f"play_audio: wav monitor wait error: {me}")
+                    with audio_lock:
+                        is_active_local = (local_id == audio_count)
+                    with state_lock:
+                        is_active_mac = (mac_id == state.get("playback_id", "-1"))
+                    if is_active_local and is_active_mac:
+                        pi_log(f"play_audio: sending PLAYBACK_DONE callback for WAV ID {mac_id} to Mac")
+                        _send_callback(f"{CB_PLAYBACK_DONE}:{mac_id}")
+                    else:
+                        pi_log(f"play_audio: obsolete WAV playback local:{local_id} mac:{mac_id}, skipping callback")
+                threading.Thread(target=_done_monitor_wav, daemon=True).start()
+                return
+            except Exception as ae:
+                pi_log(f"play_audio: direct aplay launch failed: {ae}")
         players = [
             ["mpg123", "-q", filepath],
             ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", filepath],
