@@ -128,13 +128,14 @@ def stop_audio():
         audio_count += 1
         _kill()
 
-def play_audio(filepath):
+def play_audio(filepath, playback_id):
     global audio_proc, audio_count, last_audio_ts
     with audio_lock:
         audio_count += 1
         my_local_id = audio_count
         with state_lock:
-            my_mac_id = state.get("playback_id", "-1")
+            state["playback_id"] = playback_id
+            my_mac_id = playback_id
         _kill()
         if not os.path.exists(filepath) or os.path.getsize(filepath) < 100:
             pi_log(f"play_audio: file {filepath} does not exist or too small")
@@ -444,13 +445,21 @@ def audio_server():
             if len(data) < 100:
                 continue
 
+            try:
+                idx = data.index(b"\n")
+                playback_id = data[:idx].decode().strip()
+                audio_bytes = data[idx+1:]
+            except Exception as e:
+                pi_log(f"Failed to parse audio payload: {e}")
+                continue
+
             stop_audio()
             time.sleep(0.05)
 
             with open(AUDIO_FILE, "wb") as f:
-                f.write(data)
+                f.write(audio_bytes)
 
-            play_audio(AUDIO_FILE)
+            play_audio(AUDIO_FILE, playback_id)
             state_changed.set()
 
         except Exception as e:

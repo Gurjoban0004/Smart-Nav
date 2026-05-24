@@ -392,7 +392,7 @@ def push_steps(route):
 def stop_pi_audio():
     _tcp_send(PI_IP, PI_STATUS_PORT, b"command=STOP_AUDIO\n")
 
-def send_audio_to_pi(filepath):
+def send_audio_to_pi(filepath, playback_id):
     if not os.path.exists(filepath): return False
     with _pi_heartbeat_lock:
         pi_age = time.time() - last_pi_heartbeat
@@ -401,9 +401,10 @@ def send_audio_to_pi(filepath):
     size = os.path.getsize(filepath)
     if size < 100: return False
     with open(filepath, "rb") as f:
-        data = f.read()
-    log(f"Sending {size:,}B → Pi", "GREY")
-    ok = _tcp_send(PI_IP, PI_AUDIO_PORT, data, timeout=30, retries=2)
+        audio_bytes = f.read()
+    payload = f"{playback_id}\n".encode() + audio_bytes
+    log(f"Sending {len(payload):,}B (ID {playback_id}) → Pi", "GREY")
+    ok = _tcp_send(PI_IP, PI_AUDIO_PORT, payload, timeout=30, retries=2)
     if ok: log("Sent ✓", "OK")
     else:  log("Send FAILED", "ERR")
     return ok
@@ -645,7 +646,7 @@ def speak(text, status_kw=None, slow=None, min_play_sec=0.0):
         duration = get_duration(audio_path)
         log(f"Duration: {duration:.1f}s", "GREY")
 
-        ok = send_audio_to_pi(audio_path)
+        ok = send_audio_to_pi(audio_path, active_playback_id)
 
         if ok:
             # Wait for playback: use Pi callback if available, else timer
