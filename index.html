@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chitkara University Companion Nav</title>
+    <meta name="description" content="A mobile-responsive guide for Chitkara University navigation system. Scan at the kiosk to sync steps.">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ─── DESIGN TOKENS (PASTEL THEME) ──────────────────────────────────────── */
+        :root {
+            --bg-color: #fcfaf6;
+            --card-bg: #ffffff;
+            --text-dark: #2c2a29;
+            --text-muted: #7d7a75;
+            
+            --pastel-sage: #e8efe4;
+            --pastel-sage-dark: #3f5e3e;
+            --pastel-lavender: #f1ebf5;
+            --pastel-lavender-dark: #5b4669;
+            --pastel-peach: #fdf0e8;
+            --pastel-peach-dark: #914f29;
+            --pastel-coral: #fae8e6;
+            --pastel-coral-dark: #8c3f39;
+            
+            --border-color: #efede7;
+            --shadow: 0 4px 20px rgba(142, 137, 129, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* ─── BASE RESET ────────────────────────────────────────────────────────── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            overflow-x: hidden;
+        }
+
+        /* ─── CONTAINERS & LAYOUT ───────────────────────────────────────────────── */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* ─── STATUS BADGES ─────────────────────────────────────────────────────── */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .status-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-live {
+            background-color: var(--pastel-sage);
+            color: var(--pastel-sage-dark);
+        }
+
+        .badge-offline {
+            background-color: var(--pastel-lavender);
+            color: var(--pastel-lavender-dark);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            animation: pulse-dot 2s infinite;
+        }
+
+        /* ─── CARDS ─────────────────────────────────────────────────────────────── */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: var(--transition);
+        }
+
+        /* ─── ACTIVE ROUTE DISPLAY ──────────────────────────────────────────────── */
+        .route-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .route-summary .dest-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .route-summary .dest-name {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .route-metrics {
+            display: flex;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .metric-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .metric-distance {
+            background-color: var(--pastel-peach);
+            color: var(--pastel-peach-dark);
+        }
+
+        .metric-eta {
+            background-color: var(--pastel-lavender);
+            color: var(--pastel-lavender-dark);
+        }
+
+        /* ─── TIMELINE / STEPS ──────────────────────────────────────────────────── */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-left: 10px;
+            margin-top: 5px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 15px;
+            bottom: 15px;
+            width: 2px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 16px;
+            z-index: 2;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .step-check {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: var(--card-bg);
+            transition: var(--transition);
+            margin-top: 2px;
+        }
+
+        .step-check svg {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 3px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .step-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .step-desc {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .step-subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ─── ACTIVE / CHECKED STATES ───────────────────────────────────────────── */
+        .step-item.checked {
+            background-color: var(--pastel-sage);
+            border-color: rgba(63, 94, 62, 0.1);
+        }
+
+        .step-item.checked .step-check {
+            background-color: var(--pastel-sage-dark);
+            border-color: var(--pastel-sage-dark);
+        }
+
+        .step-item.checked .step-check svg {
+            opacity: 1;
+        }
+
+        .step-item.checked .step-desc {
+            text-decoration: line-through;
+            color: var(--pastel-sage-dark);
+            opacity: 0.75;
+        }
+
+        .step-item.checked .step-subtext {
+            color: var(--pastel-sage-dark);
+            opacity: 0.65;
+        }
+
+        /* ─── DIRECTORY VIEW ────────────────────────────────────────────────────── */
+        .dir-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dir-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dir-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background-color: var(--card-bg);
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dir-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-muted);
+            background-color: var(--bg-color);
+        }
+
+        .dir-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dir-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .dir-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .dir-arrow {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .dir-item:hover .dir-arrow {
+            background-color: var(--pastel-peach);
+            color: var(--pastel-peach-dark);
+        }
+
+        /* ─── BUTTONS ───────────────────────────────────────────────────────────── */
+        .btn {
+            font-family: inherit;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-sync {
+            background-color: var(--pastel-sage-dark);
+            color: #ffffff;
+        }
+
+        .btn-sync:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: var(--pastel-coral);
+            color: var(--pastel-coral-dark);
+            border: 1px dashed rgba(140, 63, 57, 0.3);
+        }
+
+        .btn-reset:hover {
+            background-color: var(--pastel-coral-dark);
+            color: #ffffff;
+        }
+
+        /* ─── ANNOUNCEMENTS / EMPTY VIEW ────────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 30px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 6px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ─── FOOTER ────────────────────────────────────────────────────────────── */
+        footer {
+            text-align: center;
+            padding: 30px 0 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        /* ─── ANIMATIONS ────────────────────────────────────────────────────────── */
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(63, 94, 62, 0.3); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(63, 94, 62, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(63, 94, 62, 0); }
+        }
+
+        /* Responsive styling for larger views */
+        @media (min-width: 500px) {
+            body {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header>
+            <h1>Smart Nav Guide</h1>
+            <p>Chitkara University Mobile Companion</p>
+        </header>
+
+        <!-- Connection Status -->
+        <div class="status-bar" id="connection-status">
+            <span class="status-title">Mode</span>
+            <span class="badge badge-offline" id="sync-mode-badge">
+                <span class="badge-dot" style="background-color: var(--pastel-lavender-dark);"></span>
+                <span>Directory</span>
+            </span>
+        </div>
+
+        <!-- Main Display Card -->
+        <div class="card" id="main-card">
+            <!-- Active Route (Injected by JS) -->
+            <div id="route-display" style="display: none;">
+                <!-- Filled dynamically -->
+            </div>
+
+            <!-- Empty State / Kiosk Sync Instructions -->
+            <div id="empty-display" class="empty-state">
+                <div class="empty-icon">📍</div>
+                <h3>No Route Loaded</h3>
+                <p>Speak to the campus kiosk to find a location, then scan the QR code or click Sync below to load your directions.</p>
+                <button class="btn btn-sync" id="btn-initial-sync" style="margin-top: 10px;">
+                    Sync with Kiosk
+                </button>
+            </div>
+        </div>
+
+        <!-- Directory Section -->
+        <div id="directory-section">
+            <h2 class="dir-title">
+                <span>All Locations</span>
+                <span style="font-size: 12px; font-weight: 400; color: var(--text-muted);">Quick View</span>
+            </h2>
+            <div class="dir-list" id="dir-list">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+
+        <!-- Footer / Reset Button -->
+        <footer id="app-footer">
+            <button class="btn btn-reset" id="btn-clear-route" style="display: none; margin-bottom: 12px;">
+                Clear & Show Directory
+            </button>
+            <p>© 2026 Chitkara University Navigation System</p>
+            <p id="local-server-ip" style="opacity: 0.6; font-size: 10px;">Synced via secure Cloud broker</p>
+        </footer>
+
+    </div>
+
+    <!-- Script: System Logic -->
+    <script>
+        // ─── STATIC ROUTES DATABASE ──────────────────────────────────────────────
+        const ROUTES_DATABASE = {
+            "Turing Block": {
+                "destination": "Turing Block",
+                "distance_meters": 180,
+                "estimated_walking_time": "2 to 3 minutes",
+                "steps": [
+                    { "instruction": "Start from Main Gate" },
+                    { "instruction": "Walk straight", "distance": 180 },
+                    { "instruction": "Destination reached" }
+                ]
+            },
+            "DICE Lab": {
+                "destination": "DICE Lab",
+                "distance_meters": 400,
+                "estimated_walking_time": "5 to 6 minutes",
+                "steps": [
+                    { "instruction": "Start from Main Gate" },
+                    { "instruction": "Walk straight", "distance": 300 },
+                    { "instruction": "Pass Turing Block", "landmark": "Turing Block" },
+                    { "instruction": "Pass Chancellor Office", "landmark": "Chancellor Office" },
+                    { "instruction": "Turn left" },
+                    { "instruction": "Continue", "distance": 100 },
+                    { "instruction": "Destination reached" }
+                ]
+            },
+            "Square One": {
+                "destination": "Square One",
+                "distance_meters": 300,
+                "estimated_walking_time": "4 to 5 minutes",
+                "steps": [
+                    { "instruction": "Start from Main Gate" },
+                    { "instruction": "Walk straight", "distance": 300 },
+                    { "instruction": "Pass Turing Block", "landmark": "Turing Block" },
+                    { "instruction": "Pass Chancellor Office", "landmark": "Chancellor Office" },
+                    { "instruction": "Destination reached" }
+                ]
+            },
+            "Tesla Block": {
+                "destination": "Tesla Block",
+                "distance_meters": 600,
+                "estimated_walking_time": "7 to 8 minutes",
+                "steps": [
+                    { "instruction": "Start from Main Gate" },
+                    { "instruction": "Walk straight", "distance": 250 },
+                    { "instruction": "Pass Turing Block", "landmark": "Turing Block" },
+                    { "instruction": "Turn right" },
+                    { "instruction": "Walk straight", "distance": 150 },
+                    { "instruction": "Reach Gate Number 4", "landmark": "Gate 4" },
+                    { "instruction": "Continue", "distance": 200 },
+                    { "instruction": "Pass Exploratorium", "landmark": "Exploratorium" },
+                    { "instruction": "Destination reached" }
+                ]
+            },
+            "Rockefeller Block": {
+                "destination": "Rockefeller Block",
+                "distance_meters": 430,
+                "estimated_walking_time": "5 to 6 minutes",
+                "steps": [
+                    { "instruction": "Start from Main Gate" },
+                    { "instruction": "Walk straight", "distance": 400 },
+                    { "instruction": "Pass Turing Block", "landmark": "Turing Block" },
+                    { "instruction": "Pass Chancellor Office", "landmark": "Chancellor Office" },
+                    { "instruction": "Pass Omega Ground", "landmark": "Omega Ground" },
+                    { "instruction": "Cross the gate" },
+                    { "instruction": "Continue", "distance": 30 },
+                    { "instruction": "Destination reached" }
+                ]
+            }
+        };
+
+        // ─── CONFIGURATION & STATE ────────────────────────────────────────────────
+        let currentRoute = null;
+        let checkedSteps = {}; // key: destination_stepIndex, value: boolean
+        
+        // Public Cloud broker URL (prevents HTTPS mixed content blocks on Vercel)
+        const API_URL = "https://jsonblob.com/api/jsonBlob/019e5a61-300f-76df-88d2-658f90a89439";
+
+        // Elements
+        const elSyncModeBadge = document.getElementById("sync-mode-badge");
+        const elRouteDisplay = document.getElementById("route-display");
+        const elEmptyDisplay = document.getElementById("empty-display");
+        const elDirList = document.getElementById("dir-list");
+        const elBtnClear = document.getElementById("btn-clear-route");
+        const elIpFooter = document.getElementById("local-server-ip");
+        const elBtnInitialSync = document.getElementById("btn-initial-sync");
+        const elDirSection = document.getElementById("directory-section");
+
+        // ─── INITIALIZATION ──────────────────────────────────────────────────────
+        function init() {
+            // Setup local IP display
+            elIpFooter.innerText = "Synced via secure Cloud broker";
+            
+            // Build directory UI
+            renderDirectory();
+
+            // Load saved route from localStorage if present
+            const savedRouteJson = localStorage.getItem("saved_route");
+            const savedCheckedSteps = localStorage.getItem("checked_steps");
+            
+            if (savedCheckedSteps) {
+                try { checkedSteps = JSON.parse(savedCheckedSteps); } catch(e) {}
+            }
+
+            if (savedRouteJson) {
+                try {
+                    currentRoute = JSON.parse(savedRouteJson);
+                    setSyncModeUI("saved");
+                    renderRoute(currentRoute);
+                } catch (e) {
+                    clearLocalRoute();
+                }
+            } else {
+                showDirectoryUI();
+            }
+
+            // Sync Button Listeners
+            elBtnInitialSync.addEventListener("click", syncWithKiosk);
+            elBtnClear.addEventListener("click", clearLocalRoute);
+        }
+
+        // ─── NETWORK SYNC ────────────────────────────────────────────────────────
+        async function syncWithKiosk() {
+            setSyncModeUI("loading");
+            try {
+                // Fetch with a 4-second timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+                
+                const response = await fetch(API_URL, { 
+                    signal: controller.signal,
+                    headers: { 'Accept': 'application/json' }
+                });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                
+                if (data && data.route) {
+                    currentRoute = data.route;
+                    // Reset checked steps since it's a new route from kiosk
+                    checkedSteps = {};
+                    saveRouteToLocal(currentRoute);
+                    setSyncModeUI("live");
+                    renderRoute(currentRoute);
+                } else {
+                    alert("Cloud broker connected, but no active navigation route is currently running. Speak a destination to the kiosk first!");
+                    setSyncModeUI("directory");
+                }
+            } catch (error) {
+                console.error("Sync error:", error);
+                alert("Could not connect to Cloud broker. Check your internet connection!");
+                setSyncModeUI("directory");
+            }
+        }
+
+        // ─── RENDER ENGINE ───────────────────────────────────────────────────────
+        function renderRoute(route) {
+            const destName = route.destination;
+            const dist = route.distance_meters;
+            const eta = route.estimated_walking_time;
+            const steps = route.steps || [];
+
+            elRouteDisplay.style.display = "block";
+            elEmptyDisplay.style.display = "none";
+            elBtnClear.style.display = "flex";
+            elDirSection.style.display = "none"; // Hide directory when viewing a route
+
+            let stepsHtml = "";
+            steps.forEach((step, idx) => {
+                const stepKey = `${destName}_${idx}`;
+                const isChecked = checkedSteps[stepKey] ? "checked" : "";
+                
+                // Metrics / Subtext builders
+                let subtext = "";
+                if (step.distance) subtext += `${step.distance}m`;
+                if (step.landmark) {
+                    if (subtext) subtext += " • ";
+                    subtext += `Near ${step.landmark}`;
+                }
+
+                stepsHtml += `
+                    <div class="step-item ${isChecked}" onclick="toggleStep('${destName}', ${idx})">
+                        <div class="step-check">
+                            <svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="step-text">
+                            <span class="step-desc">${step.instruction}</span>
+                            ${subtext ? `<span class="step-subtext">${subtext}</span>` : ""}
+                        </div>
+                    </div>
+                `;
+            });
+
+            elRouteDisplay.innerHTML = `
+                <div class="route-summary">
+                    <span class="dest-label">Directions for</span>
+                    <span class="dest-name">${destName}</span>
+                    <div class="route-metrics">
+                        <span class="metric-pill metric-distance">📏 ${dist} meters</span>
+                        <span class="metric-pill metric-eta">⏱️ ${eta}</span>
+                    </div>
+                </div>
+                
+                <div class="timeline">
+                    ${stepsHtml}
+                </div>
+            `;
+        }
+
+        function renderDirectory() {
+            let listHtml = "";
+            Object.keys(ROUTES_DATABASE).forEach(key => {
+                const r = ROUTES_DATABASE[key];
+                listHtml += `
+                    <div class="dir-item" onclick="loadStaticRoute('${key}')">
+                        <div class="dir-info">
+                            <span class="dir-name">${r.destination}</span>
+                            <span class="dir-meta">📏 ${r.distance_meters}m  •  ⏱️ ${r.estimated_walking_time}</span>
+                        </div>
+                        <div class="dir-arrow">➔</div>
+                    </div>
+                `;
+            });
+            elDirList.innerHTML = listHtml;
+        }
+
+        function showDirectoryUI() {
+            elRouteDisplay.style.display = "none";
+            elEmptyDisplay.style.display = "flex";
+            elBtnClear.style.display = "none";
+            elDirSection.style.display = "block";
+            setSyncModeUI("directory");
+        }
+
+        // ─── STATE CHANGES / PERSISTENCE ────────────────────────────────────────
+        function toggleStep(destName, idx) {
+            const stepKey = `${destName}_${idx}`;
+            const stepItems = elRouteDisplay.querySelectorAll(".step-item");
+            const stepItem = stepItems[idx];
+            
+            if (checkedSteps[stepKey]) {
+                delete checkedSteps[stepKey];
+                stepItem.classList.remove("checked");
+            } else {
+                checkedSteps[stepKey] = true;
+                stepItem.classList.add("checked");
+            }
+            
+            localStorage.setItem("checked_steps", JSON.stringify(checkedSteps));
+        }
+
+        function loadStaticRoute(destName) {
+            const route = ROUTES_DATABASE[destName];
+            if (route) {
+                currentRoute = route;
+                checkedSteps = {}; // Clear checked steps for new static selection
+                saveRouteToLocal(route);
+                setSyncModeUI("saved");
+                renderRoute(route);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function saveRouteToLocal(route) {
+            localStorage.setItem("saved_route", JSON.stringify(route));
+            localStorage.setItem("checked_steps", JSON.stringify(checkedSteps));
+        }
+
+        function clearLocalRoute() {
+            localStorage.removeItem("saved_route");
+            localStorage.removeItem("checked_steps");
+            currentRoute = null;
+            checkedSteps = {};
+            showDirectoryUI();
+        }
+
+        function setSyncModeUI(mode) {
+            if (mode === "live") {
+                elSyncModeBadge.className = "badge badge-live";
+                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-sage-dark);"></span><span>Live Connected</span>`;
+            } else if (mode === "saved") {
+                elSyncModeBadge.className = "badge badge-live";
+                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-sage-dark);"></span><span>Offline Saved</span>`;
+            } else if (mode === "loading") {
+                elSyncModeBadge.className = "badge badge-offline";
+                elSyncModeBadge.innerHTML = `<span>Connecting...</span>`;
+            } else {
+                elSyncModeBadge.className = "badge badge-offline";
+                elSyncModeBadge.innerHTML = `<span class="badge-dot" style="background-color: var(--pastel-lavender-dark);"></span><span>Directory Mode</span>`;
+            }
+        }
+
+        // Run
+        window.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>

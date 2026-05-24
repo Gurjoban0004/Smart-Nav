@@ -1,0 +1,204 @@
+{
+    "campus": "Chitkara University",
+    "routes": [
+        {
+            "source": "Main Gate",
+            "destination": "Turing Block",
+            "aliases": [
+                "turing",
+                "during",
+                "touring",
+                "teuring",
+                "turing block",
+                "chew ring",
+                "uring",
+                "churing"
+            ],
+            "distance_meters": 180,
+            "estimated_walking_time": "2 to 3 minutes",
+            "steps": [
+                {
+                    "instruction": "Start from Main Gate"
+                },
+                {
+                    "instruction": "Walk straight",
+                    "distance": 180
+                },
+                {
+                    "instruction": "Destination reached"
+                }
+            ]
+        },
+        {
+            "source": "Main Gate",
+            "destination": "DICE Lab",
+            "aliases": [
+                "dice",
+                "data lab",
+                "dice lab",
+                "dies lab",
+                "dye lab",
+                "diess lab",
+                "dyce lab",
+                "dice block",
+                "dice blocks",
+                "dice-lab"
+            ],
+            "distance_meters": 400,
+            "estimated_walking_time": "5 to 6 minutes",
+            "steps": [
+                {
+                    "instruction": "Start from Main Gate"
+                },
+                {
+                    "instruction": "Walk straight",
+                    "distance": 300
+                },
+                {
+                    "instruction": "Pass Turing Block",
+                    "landmark": "Turing Block"
+                },
+                {
+                    "instruction": "Pass Chancellor Office",
+                    "landmark": "Chancellor Office"
+                },
+                {
+                    "instruction": "Turn left"
+                },
+                {
+                    "instruction": "Continue",
+                    "distance": 100
+                },
+                {
+                    "instruction": "Destination reached"
+                }
+            ]
+        },
+        {
+            "source": "Main Gate",
+            "destination": "Square One",
+            "aliases": [
+                "square",
+                "square one",
+                "square 1",
+                "squire one",
+                "square-one"
+            ],
+            "distance_meters": 300,
+            "estimated_walking_time": "4 to 5 minutes",
+            "steps": [
+                {
+                    "instruction": "Start from Main Gate"
+                },
+                {
+                    "instruction": "Walk straight",
+                    "distance": 300
+                },
+                {
+                    "instruction": "Pass Turing Block",
+                    "landmark": "Turing Block"
+                },
+                {
+                    "instruction": "Pass Chancellor Office",
+                    "landmark": "Chancellor Office"
+                },
+                {
+                    "instruction": "Destination reached"
+                }
+            ]
+        },
+        {
+            "source": "Main Gate",
+            "destination": "Tesla Block",
+            "aliases": [
+                "tesla",
+                "tesla block",
+                "tasla block",
+                "tasla",
+                "tešla"
+            ],
+            "distance_meters": 600,
+            "estimated_walking_time": "7 to 8 minutes",
+            "steps": [
+                {
+                    "instruction": "Start from Main Gate"
+                },
+                {
+                    "instruction": "Walk straight",
+                    "distance": 250
+                },
+                {
+                    "instruction": "Pass Turing Block",
+                    "landmark": "Turing Block"
+                },
+                {
+                    "instruction": "Turn right"
+                },
+                {
+                    "instruction": "Walk straight",
+                    "distance": 150
+                },
+                {
+                    "instruction": "Reach Gate Number 4",
+                    "landmark": "Gate 4"
+                },
+                {
+                    "instruction": "Continue",
+                    "distance": 200
+                },
+                {
+                    "instruction": "Pass Exploratorium",
+                    "landmark": "Exploratorium"
+                },
+                {
+                    "instruction": "Destination reached"
+                }
+            ]
+        },
+        {
+            "source": "Main Gate",
+            "destination": "Rockefeller Block",
+            "aliases": [
+                "rockefeller",
+                "rocky feller",
+                "rockefeller block",
+                "rockefellar",
+                "rocker feller",
+                "rocky-feller"
+            ],
+            "distance_meters": 430,
+            "estimated_walking_time": "5 to 6 minutes",
+            "steps": [
+                {
+                    "instruction": "Start from Main Gate"
+                },
+                {
+                    "instruction": "Walk straight",
+                    "distance": 400
+                },
+                {
+                    "instruction": "Pass Turing Block",
+                    "landmark": "Turing Block"
+                },
+                {
+                    "instruction": "Pass Chancellor Office",
+                    "landmark": "Chancellor Office"
+                },
+                {
+                    "instruction": "Pass Omega Ground",
+                    "landmark": "Omega Ground"
+                },
+                {
+                    "instruction": "Cross the gate"
+                },
+                {
+                    "instruction": "Continue",
+                    "distance": 30
+                },
+                {
+                    "instruction": "Destination reached"
+                }
+            ]
+        }
+    ]
+}
