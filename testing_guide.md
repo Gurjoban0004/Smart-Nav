@@ -73,7 +73,7 @@ Below is the complete data flow showing how the **ESP32 Button**, **Mac Brain**,
 
 ### Q5: How is the "Welcome Deadlock" solved?
 * If the Pi boots up first, it doesn't know the Mac's IP because the Mac's IP is dynamic.
-* **Solution**: The Mac server sends status updates (pings) to the Pi's static IP (`192.168.245.8`) on port `5050` every 10 seconds. On the first incoming packet, the Pi reads the source address, discovers the Mac's IP automatically, launches its heartbeats/callbacks, and triggers the welcome greeting.
+* **Solution**: The Mac server sends status updates (pings) to the Pi's static IP (`10.221.234.8`) on port `5050` every 10 seconds. On the first incoming packet, the Pi reads the source address, discovers the Mac's IP automatically, launches its heartbeats/callbacks, and triggers the welcome greeting.
 
 ---
 
@@ -92,9 +92,9 @@ If the Pi gets a new IP from the router, you must update the IP inside the Mac B
 1. Open [mac_server.py](file:///Users/gurjobansingh/Desktop/nav/mac_server.py).
 2. Locate the line near the top (around Line 42):
    ```python
-   PI_IP           = "192.168.245.8"
+   PI_IP           = "10.221.234.8"
    ```
-3. Replace `"192.168.245.8"` with the Pi's new IP address.
+3. Replace `"10.221.234.8"` with the Pi's new IP address.
 4. Save the file and restart the Mac server.
 
 ### Part C: Changing Wi-Fi credentials on Pi or Mac

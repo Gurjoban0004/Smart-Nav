@@ -39,7 +39,7 @@ import edge_tts
 
 _SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
 ROUTES_FILE     = os.path.join(_SCRIPT_DIR, "routes_v2.json")
-PI_IP           = "192.168.245.8"
+PI_IP           = "10.221.234.8"
 PI_AUDIO_PORT   = AUDIO_PORT
 PI_STATUS_PORT  = STATUS_PORT
 SAMPLE_RATE     = 16000
